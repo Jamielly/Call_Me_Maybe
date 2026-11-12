@@ -1,3 +1,5 @@
+*This project has been created as part of the 42 curriculum by jamsilva*
+
 # Call_Me_Maybe
 
 ### 📁 1\. Estrutura de Pastas e Ambiente com `uv`
