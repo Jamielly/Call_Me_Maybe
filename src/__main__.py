@@ -23,6 +23,13 @@ def main() -> None:
 
     os.makedirs(os.path.dirname(args.output), exist_ok=True)
 
+    decoder = ConstrainedDecoder(args.functions_definition)
+    results = []
+    for item in test_prompts:
+    prompt_text = item["prompt"]  # confira se a chave no JSON de entrada é "prompt"
+    prediction = decoder.predict(prompt_text)
+    results.append(prediction)
+    
     green = "\033[92m"
     reset = "\033[0m"
 
