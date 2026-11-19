@@ -1,8 +1,10 @@
-"""Data models for function definitions, prompts, and call outputs."""
+"""Data models for function definitions and call outputs."""
 
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field
+
+ParamValue = Union[str, int, float, bool]
 
 
 class ParameterSchema(BaseModel):
@@ -25,17 +27,18 @@ class FunctionDefinition(BaseModel):
     returns: Optional[Any] = None
 
 
-class PromptInput(BaseModel):
-    """Model representing each input prompt from function_calling_tests.json."""
-
-    model_config = ConfigDict(extra="ignore")
-
-    prompt: str
-
-
 class FunctionCallOutput(BaseModel):
     """Model for the final output written to function_calls.json."""
 
     prompt: str
     name: str
-    parameters: dict[str, Any] = Field(default_factory=dict)
+    parameters: dict[str, ParamValue] = Field(default_factory=dict)
+
+    def normalize(self, func_def: FunctionDefinition) -> None:
+        """Ensure number parameters are float and integer are int."""
+        for key, schema in func_def.parameters.items():
+            if key in self.parameters:
+                if schema.type == "number":
+                    self.parameters[key] = float(self.parameters[key])
+                elif schema.type == "integer":
+                    self.parameters[key] = int(float(self.parameters[key]))
