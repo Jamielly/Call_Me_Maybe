@@ -1,69 +1,77 @@
+"""Main entry point for Call Me Maybe constrained function calling."""
+
 import argparse
 import json
 import os
 import sys
 from typing import Any, Dict, List
 
+from pydantic import ValidationError
+
 from src.decoder import ConstrainedDecoder
 
 
 def parse_args() -> argparse.Namespace:
+    """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
-        description="Call Me Maybe - Function Calling"
+        description="Call Me Maybe - Constrained Function Calling"
     )
     parser.add_argument(
         "--functions_definition",
+        type=str,
         default="data/input/functions_definition.json",
         help="Path to functions definition JSON file",
     )
     parser.add_argument(
         "--input",
+        type=str,
         default="data/input/function_calling_tests.json",
-        help="Path to input test queries JSON file",
+        help="Path to input test prompts JSON file",
     )
     parser.add_argument(
         "--output",
-        default="data/output/function_calling_results.json",
+        type=str,
+        default="data/output/function_calls.json",
         help="Path to output JSON file",
     )
     return parser.parse_args()
 
 
 def main() -> None:
+    """Run constrained decoding pipeline over input test prompts."""
     args = parse_args()
-    green = "\033[92m"
-    red = "\033[91m"
-    reset = "\033[0m"
 
     try:
-        # 1. Carrega os prompts de teste do arquivo de entrada
         with open(args.input, "r", encoding="utf-8") as f:
             test_prompts: List[Dict[str, Any]] = json.load(f)
 
-        # 2. Inicializa o decoder uma única vez (carrega o modelo Qwen)
         decoder = ConstrainedDecoder(args.functions_definition)
 
-        # 3. Processa cada prompt da lista
         results: List[Dict[str, Any]] = []
         for item in test_prompts:
-            prompt_text = item["prompt"]
-            prediction = decoder.predict(prompt_text)
-            results.append(prediction)
+            prompt = item.get("prompt", "")
+            if not prompt:
+                continue
+            prediction = decoder.predict(prompt)
+            results.append(prediction.model_dump())
 
-        # 4. Garante que o diretório de saída existe (caso passem só o nome do arquivo)
         output_dir = os.path.dirname(args.output)
         if output_dir:
             os.makedirs(output_dir, exist_ok=True)
 
-        # 5. Salva o JSON final formatado
         with open(args.output, "w", encoding="utf-8") as f:
             json.dump(results, f, indent=2, ensure_ascii=False)
 
-        print(f"{green}Call Me Maybe finalizado com sucesso!{reset}")
-        print(f"Resultados salvos em: {args.output}")
+        print(f"Success: {len(results)} calls saved to '{args.output}'.")
 
-    except (FileNotFoundError, json.JSONDecodeError, KeyError, OSError) as exc:
-        print(f"{red}Erro durante a execução: {exc}{reset}", file=sys.stderr)
+    except (
+        FileNotFoundError,
+        json.JSONDecodeError,
+        KeyError,
+        OSError,
+        ValidationError,
+    ) as exc:
+        print(f"Error: {exc}", file=sys.stderr)
         sys.exit(1)
 
 
