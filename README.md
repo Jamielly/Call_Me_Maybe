@@ -132,6 +132,6 @@ The core logic was written by me: constrained decoding, logit masking, vocabular
 
 <div align="center">
 
-<img src="assets/call_me.gif" alt="Constrained decoding: JSON is built token by token while invalid candidates are masked out" width="720"/>
+<img src="assets/call_me_maybe_desperate.gif" alt="Constrained decoding: JSON is built token by token while invalid candidates are masked out" width="720"/>
 
 </div>
