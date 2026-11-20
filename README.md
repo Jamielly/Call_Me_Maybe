@@ -127,3 +127,11 @@ In line with the 42 guidelines on AI usage, I declare the following uses of AI t
 - **Documentation:** refining the clarity and structure of this README.
 
 The core logic was written by me: constrained decoding, logit masking, vocabulary filtering and testing against the evaluation datasets. All AI suggestions were reviewed, adapted and validated before being used.
+
+---
+
+<div align="center">
+
+<img src="assets/call_me.gif" alt="Constrained decoding: JSON is built token by token while invalid candidates are masked out" width="720"/>
+
+</div>
